@@ -1,13 +1,44 @@
-if (window.stockMapping) {
-  $('.productSizeSelection-select-option').each((_, option) => {
-    var left = window.stockMapping[option.value].left;
-    if (left.length === 0) {
-      // jeans/pants page
+(function() {
+  const isBottom = function (pair) {
+    return pair.left.length === 0;
+  }
+  
+  const affixBottom = function (option, pair) {
+    const { right: [ lengths ] } = pair;
+    const levels = [];
+    
+    for (let length in lengths) {
+      levels.push(length + ':' + lengths[length].level);
+    }
+    
+    if (levels.length === 0) {
       return;
     }
-    var level = left[0].level;
+    
+    option.innerText += ' - ' + levels.join(', ');
+  }
+  
+  const affixTop = function (option, pair) {
+    const { left } = pair;
+    const level = left[0].level;
+    
     if (level !== 0) {
-      option.innerText = option.innerText + ' - ' + level;
+      option.innerText += ' - ' + level;
     }
-  });
-}
+  }
+  
+  if (window.stockMapping) {
+    const firstSelectSelector = '.productSizeSelection-select[name=gridvalue1]';
+    const optionSelector = '.productSizeSelection-select-option';
+    
+    $(firstSelectSelector + ' ' + optionSelector).each((_, option) => {
+      const pair = window.stockMapping[option.value];
+      
+      if (isBottom(pair)) {
+        affixBottom(option, pair);
+      } else {
+        affixTop(option, pair);
+      }
+    });
+  }
+}());
